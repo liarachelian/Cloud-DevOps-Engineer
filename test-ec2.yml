@@ -1,0 +1,67 @@
+Description: |
+  Lee Arachelian - Udacity Cloud DevOps Engineer 
+
+Parameters:
+
+     EnvironmentName:
+         Description: Env Name that will be prefixed in order to access Variables exported in the stack from Lession 21
+         Type: String
+  
+     
+
+Resources:
+
+  MyEC2Instance: #An inline comment
+        Type: "AWS::EC2::Instance"
+        Properties: 
+            ImageId: "ami-0d1cd67c26f5fca19" #Another comment -- This is a Ubuntu AMI
+            InstanceType: t3.small
+            KeyName: "private-server-key"
+            SubnetId: 
+                Fn::ImportValue:
+                  !Sub "${EnvironmentName}-PRI1-SN"
+            SecurityGroups:
+                Fn::ImportValue:
+                  !Sub "${EnvironmentName}-WebApp-SG"
+       
+
+  MyEC2Instance1: #An inline comment
+        Type: "AWS::EC2::Instance"
+        Properties: 
+            ImageId: "ami-0d1cd67c26f5fca19" #Another comment -- This is a Ubuntu AMI
+            InstanceType: t3.small
+            KeyName: "private-server-key"
+            SubnetId: 
+                Fn::ImportValue:
+                  !Sub "${EnvironmentName}-PRI1-SN"
+            #SecurityGroups:
+                #Fn::ImportValue:
+                  #!Sub "${EnvironmentName}-WebApp-SG"
+       
+  MyEC2Instance2: #An inline comment
+        Type: "AWS::EC2::Instance"
+        Properties: 
+            ImageId: "ami-0d1cd67c26f5fca19" #Another comment -- This is a Ubuntu AMI
+            InstanceType: t3.small
+            KeyName: "private-server-key"
+            SubnetId: 
+                Fn::ImportValue:
+                  !Sub "${EnvironmentName}-PRI1-SN"
+            #SecurityGroups:
+                #Fn::ImportValue:
+                  #!Sub "${EnvironmentName}-WebApp-SG"
+       
+  MyEC2Instance3: #An inline comment
+        Type: "AWS::EC2::Instance"
+        Properties: 
+            ImageId: "ami-0d1cd67c26f5fca19" #Another comment -- This is a Ubuntu AMI
+            InstanceType: t3.small
+            KeyName: "private-server-key"
+            SubnetId: 
+                Fn::ImportValue:
+                  !Sub "${EnvironmentName}-PRI1-SN"
+            #SecurityGroups:
+                #Fn::ImportValue:
+                  #!Sub "${EnvironmentName}-WebApp-SG"
+       
+        
