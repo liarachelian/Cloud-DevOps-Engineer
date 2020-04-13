@@ -1,5 +1,5 @@
 Description: |
-  André Rieck - Udacity Cloud Tech Course 
+    Lee Arachelian- Udacity Cloud Tech Course 
 
 Parameters:
 
@@ -44,8 +44,8 @@ Resources:
           IpProtocol: tcp
       SecurityGroupIngress: 
         - CidrIp: 0.0.0.0/0
-          FromPort: 8080
-          ToPort: 8080
+          FromPort: 80
+          ToPort: 80
           IpProtocol: tcp
         - CidrIp: 0.0.0.0/0
           FromPort: 22
@@ -61,20 +61,31 @@ Resources:
             apt-get update -y
             apt-get install apache2 -y
             cd /var/www/html
-            aws s3 cp s3://cloud-project-2/udacity.zip .
+            aws s3 cp s3://your-bucket-address/udacity.zip .
             unzip -o udacity.zip
-            snap install amazon-ssm-agent --classic
-            systemctl start apache2.service
+            systemctl start apache2.service        
 
       ImageId: ami-0d1cd67c26f5fca19  # ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20191002
       SecurityGroups:
       - Ref: WebServerSecGroup
       IamInstanceProfile: !Ref ProfileWithRolesForOurApp
+      KeyName: "private-server-key"
       InstanceType: t3.small
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
           VolumeSize: '10'
+  WebAppGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName:
+        Ref: WebAppLaunchConfig
+      MinSize: "4"
+      MaxSize: "5"
+      TargetGroupARNs:
+        - Ref: WebAppTargetGroup
   WebAppLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -113,12 +124,13 @@ Resources:
         HealthCheckProtocol: HTTP
         HealthCheckTimeoutSeconds: 8
         HealthyThresholdCount: 2
-        Port: 8080
+        Port: 80
         Protocol: HTTP
         UnhealthyThresholdCount: 5
         VpcId: 
           Fn::ImportValue:
             !Sub "${EnvironmentName}-VPCID"
+  
   ProfileWithRolesForOurApp:
     Type: AWS::IAM::InstanceProfile
     Properties: 
@@ -128,38 +140,8 @@ Resources:
         - S3_IAM_Role
 Outputs: 
 
-    WebServerSecGroup: 
-        Description: A reference to the created WebServer Security Group
-        Value: !Ref WebServerSecGroup
+    WebAppLB:
+        Description: The public URL of the LoadBalancer
+        Value: !GetAtt WebAppLB.DNSName
         Export:
-          Name: !Sub ${EnvironmentName}-WebApp-SG
-    WebAppTargetGroup: 
-        Description: A reference to the created WebServer Target Group
-        Value: !Ref WebAppTargetGroup
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-TG
-    WebAppLaunchConfig: 
-        Description: A reference to the created WebServer Launch Configuration
-        Value: !Ref WebAppLaunchConfig
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-Config
-    WebAppLB: 
-        Description: A reference to the created WebServer Load Balancer
-        Value: !Ref WebAppLB
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-LB
-    Listener: 
-        Description: A reference to the created WebServer listener
-        Value: !Ref Listener
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-Listener
-    LBSecGroup: 
-        Description: A reference to the created WebServer Load Balancer SecGroup
-        Value: !Ref LBSecGroup
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-LB-SG
-    ALBListenerRule: 
-        Description: A reference to the created WebServer Listener Rules
-        Value: !Ref ALBListenerRule
-        Export:
-          Name: !Sub ${EnvironmentName}-WebApp-Listener-Rules
+          Name: !Sub ${EnvironmentName}-Udagram
