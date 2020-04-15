@@ -58,20 +58,22 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
             #!/bin/bash
-            apt-get update -y
-            apt-get install apache2 -y
-            cd /var/www/html
-            aws s3 cp s3://cloud-project-2/udacity.zip .
-            unzip -o udacity.zip
-            systemctl start apache2.service
+              apt-get update -y
+              apt install -y awscli apache2 unzip
+              snap install amazon-ssm-agent --classic
+              systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+              cd /var/www/html
+              aws s3 cp s3://cloud-project-2/udacity.zip .                                         
+              unzip -o udacity.zip                                    
+              systemctl start apache2.service                
 
       ImageId: ami-0d1cd67c26f5fca19  # ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20191002
       SecurityGroups:
       - Ref: WebServerSecGroup
       IamInstanceProfile: !Ref ProfileWithRolesForOurApp
-      KeyName: "private-server-key"
       InstanceType: t3.small
       BlockDeviceMappings:
+
       - DeviceName: "/dev/sdk"
         Ebs:
           VolumeSize: '10'
@@ -142,6 +144,8 @@ Resources:
                             - "ec2.amazonaws.com"
                     Action:
                         - "sts:AssumeRole"
+          ManagedPolicyArns:
+                - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
           Path: "/"
   RolePolicies:
       Type: "AWS::IAM::Policy"
